@@ -13,30 +13,31 @@ KB = 1024
 # FALTA: Hacer que los valores esten entre los limites
 cache_size = int(sys.argv[1]) # Between 32 and 128, in KB
 block_size = int(sys.argv[2]) # Between 32 and 128, in bytes
-asociativity = int(sys.argv[3]) # Number of ways, between 4 and 16
+associativity = int(sys.argv[3]) # Number of ways, between 4 and 16
 
 offset = math.log(block_size, 2)
-index = math.log(cache_size*KB/(block_size*asociativity), 2)
+index = math.log(cache_size * KB / (block_size * associativity), 2)
 tag = addr_size - offset - index
 
 print("Cache size:", cache_size, "\n",
       "Block size:", block_size, "\n",
-      "Asociativity:", asociativity)
+      "Associativity:", associativity)
 
 file = open("data", "r")
 
 start = time.time()
 
 cache = []
-for i in range(asociativity):
+for i in range(associativity):
     way = []
     for j in range(int(2**index)):
-        # Set structure: valid, tag, data, LRU value
-        way.append([0, 0, [x for x in range(block_size)], 0])
+        # Set structure: valid, tag, LRU value, data
+        way.append([0, 0, 0, [x for x in range(block_size)]])
     cache.append(way)
         
 hits = 0
 misses = 0
+
 
 for line in file:
     addr = toBin(int(line[4], 16), 4).replace("0b", "") + toBin(int(line[5], 16), 4).replace("0b", "") + \
@@ -64,13 +65,6 @@ for line in file:
             # Aplicar politica de reemplazo
             misses += 1
     
-    
-
-# print(addr)
-# print("Tag: ", addr_tag)
-# print("Index: ", addr_index)
-# print("Offset: ", addr_offset)
-# print()
 
 print("Hits:", hits)
 print("Misses: ", misses)

@@ -23,7 +23,7 @@ print("Cache size:", cache_size, "\n",
       "Block size:", block_size, "\n",
       "Asociativity:", asociativity)
 
-file = open("data2", "r")
+file = open("data", "r")
 
 start = time.time()
 
@@ -35,21 +35,47 @@ for i in range(asociativity):
         way.append([0, 0, [x for x in range(block_size)], 0])
     cache.append(way)
         
-print(cache[0][0])
+hits = 0
+misses = 0
 
 for line in file:
-    addr = toBin(int(line[4], 16), 4).replace("0b", "") + toBin(int(line[5], 16), 4).replace("0b", "") + toBin(int(line[6], 16), 4).replace("0b", "") + toBin(int(line[7], 16), 4).replace("0b", "") + toBin(int(line[8], 16), 4).replace("0b", "") + toBin(int(line[9], 16), 4).replace("0b", "") + toBin(int(line[10], 16), 4).replace("0b", "") + toBin(int(line[11], 16), 4).replace("0b", "")
+    addr = toBin(int(line[4], 16), 4).replace("0b", "") + toBin(int(line[5], 16), 4).replace("0b", "") + \
+           toBin(int(line[6], 16), 4).replace("0b", "") + toBin(int(line[7], 16), 4).replace("0b", "") + \
+           toBin(int(line[8], 16), 4).replace("0b", "") + toBin(int(line[9], 16), 4).replace("0b", "") + \
+           toBin(int(line[10], 16), 4).replace("0b", "") + toBin(int(line[11], 16), 4).replace("0b", "")
+
     addr_tag = addr[0 : int(tag)]
     addr_index = addr[int(tag) : int(tag)+int(index)]
     addr_offset = addr[int(tag)+int(index) : int(tag)+int(index)+int(offset)]
-    # print(addr)
-    # print("Tag: ", addr_tag)
-    # print("Index: ", addr_index)
-    # print("Offset: ", addr_offset)
-    # print()
+    index_int = int(addr_index, 2)
 
+    i = 0
+    for way in cache:
+        i += 1
+        if (way[index_int][0] == 0):
+            way[index_int][0] = 1
+            way[index_int][1] = addr_tag
+            misses += 1
+            break
+        if (way[index_int][0] == 1 and addr_tag == way[index_int][1]):
+            hits += 1
+            break                    
+        if (i == len(cache)-1):
+            # Aplicar politica de reemplazo
+            misses += 1
+    
+    
+
+# print(addr)
+# print("Tag: ", addr_tag)
+# print("Index: ", addr_index)
+# print("Offset: ", addr_offset)
+# print()
+
+print("Hits:", hits)
+print("Misses: ", misses)
 
 end = time.time()
 
-print("Execution time: ", end-start)
+print("Execution time: ", (end-start)/60, "minutes")
 

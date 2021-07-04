@@ -5,26 +5,25 @@ import math
 from functions import toBin
 from prueba import lruPolicy
 
-
 # Constants
 addr_size = 32
 KB = 1024
 
 
-# FALTA: Hacer que los valores esten entre los limites
 cache_size = int(sys.argv[1]) # Between 32 and 128, in KB
 block_size = int(sys.argv[2]) # Between 32 and 128, in bytes
 associativity = int(sys.argv[3]) # Number of ways, between 4 and 16
+input_file = sys.argv[4]
 
 offset = math.log(block_size, 2)
 index = math.log(cache_size * KB / (block_size * associativity), 2)
 tag = addr_size - offset - index
 
-print("Cache size:", cache_size)
-print("Block size:", block_size)
+print("Cache size:", cache_size, "KB")
+print("Block size:", block_size , "bytes")
 print("Associativity:", associativity)
 
-file = open("data", "r")
+file = open(input_file, "r")
 
 start = time.time()
 
@@ -54,23 +53,7 @@ for line in file:
     if result:
         hits += 1
     else:  
-        misses += 1
-
-    # i = 0
-    # for way in cache:
-    #     i += 1
-    #     if (way[index_int][0] == 0):
-    #         way[index_int][0] = 1
-    #         way[index_int][1] = addr_tag
-    #         misses += 1
-    #         break
-    #     if (way[index_int][0] == 1 and addr_tag == way[index_int][1]):
-    #         hits += 1
-    #         break                    
-    #     if (i == len(cache)-1):
-    #         # Aplicar politica de reemplazo
-    #         misses += 1
-    
+        misses += 1    
 
 print("\nHits:", hits)
 print("Misses:", misses)

@@ -1,5 +1,3 @@
-from operator import itemgetter
-
 def lruPolicy(cache, index, tag, associativity):
     ''' Implements LRU policy. Returns 1 for hit
     and 0 for miss. '''
@@ -12,7 +10,7 @@ def lruPolicy(cache, index, tag, associativity):
             if (way[index][2] != associativity):
                 way[index][2] = associativity + 1
                 for way2 in cache:
-                    if (way2[index][2] != 0):
+                    if (way2[index][2] > 1):
                         way2[index][2] -= 1
             # hit
             return 1    
@@ -27,7 +25,7 @@ def lruPolicy(cache, index, tag, associativity):
             if (way[index][2] != associativity):
                 way[index][2] = associativity + 1
                 for way2 in cache:
-                    if (way2[index][2] != 0):
+                    if (way2[index][2] > 1):
                         way2[index][2] -= 1
             
             # miss
@@ -36,25 +34,18 @@ def lruPolicy(cache, index, tag, associativity):
     lru_list = []
 
     for i in range(associativity):
-        lru_list.append([i, cache[i][index][2]])
+        lru_list.append(cache[i][index][2])
     
-    lru_list.sort(key=itemgetter(1))
+    # se obtiene el la posicion del menos usado
+    lru = min(range(len(lru_list)), key=lru_list.__getitem__)
 
-    cache[lru_list[0][0]][index][1] = tag
+    # update tag
+    cache[lru][index][1] = tag
     # this is the last recently used
-    if (cache[lru_list[0][0]][index][2] != associativity):
-        cache[lru_list[0][0]][index][2] = associativity + 1
-        for way2 in cache:
-            if (way2[index][2] != 0):
-                way2[index][2] -= 1     
+    cache[lru][index][2] = associativity + 1
+    for way2 in cache:
+        if (way2[index][2] > 1):
+            way2[index][2] -= 1     
 
     return 0
-    # for i in range(len(lru_list)):
-    #     try: 
-    #         if (lru_list[i][1] < lru_list[i+1][1]):
-    #             cache[lru_list[i][0]][index][1] = tag
-    #             cache[lru_list[i][0]][index][2] = associativity
-    #     except:
-    #         cache[associativity-1][index][1] = tag
-    #         cache[associativity-1][index][2] = associativity
     

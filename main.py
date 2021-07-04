@@ -3,6 +3,7 @@ import sys
 import math
 # Files
 from functions import toBin
+from prueba import lruPolicy
 
 
 # Constants
@@ -23,7 +24,7 @@ print("Cache size:", cache_size)
 print("Block size:", block_size)
 print("Associativity:", associativity)
 
-file = open("data2", "r")
+file = open("data", "r")
 
 start = time.time()
 
@@ -31,13 +32,12 @@ cache = []
 for i in range(associativity):
     way = []
     for j in range(int(2**index)):
-        # Set structure: valid, tag, LRU value, data
-        way.append([0, 0, 0, [x for x in range(block_size)]])
+        # Set structure: valid, tag, LRU value
+        way.append([0, 0, 0])
     cache.append(way)
         
 hits = 0
 misses = 0
-
 
 for line in file:
     addr = toBin(int(line[4], 16), 4).replace("0b", "") + toBin(int(line[5], 16), 4).replace("0b", "") + \
@@ -50,24 +50,31 @@ for line in file:
     addr_offset = addr[int(tag)+int(index) : int(tag)+int(index)+int(offset)]
     index_int = int(addr_index, 2)
 
-    i = 0
-    for way in cache:
-        i += 1
-        if (way[index_int][0] == 0):
-            way[index_int][0] = 1
-            way[index_int][1] = addr_tag
-            misses += 1
-            break
-        if (way[index_int][0] == 1 and addr_tag == way[index_int][1]):
-            hits += 1
-            break                    
-        if (i == len(cache)-1):
-            # Aplicar politica de reemplazo
-            misses += 1
+    result = lruPolicy(cache, index_int, addr_tag, associativity)
+    if result:
+        hits += 1
+    else:  
+        misses += 1
+
+    # i = 0
+    # for way in cache:
+    #     i += 1
+    #     if (way[index_int][0] == 0):
+    #         way[index_int][0] = 1
+    #         way[index_int][1] = addr_tag
+    #         misses += 1
+    #         break
+    #     if (way[index_int][0] == 1 and addr_tag == way[index_int][1]):
+    #         hits += 1
+    #         break                    
+    #     if (i == len(cache)-1):
+    #         # Aplicar politica de reemplazo
+    #         misses += 1
     
 
-print("Hits:", hits)
-print("Misses: ", misses)
+print("\nHits:", hits)
+print("Misses:", misses)
+print("Hits percentage: " +  str(hits/(hits+misses)*100) + "%\n")
 
 end = time.time()
 

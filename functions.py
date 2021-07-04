@@ -1,6 +1,6 @@
 def toBin(num, n):
-    """ Devuelve un numero binario
-    con n cantidad de bits. """
+    """ Returns binary number
+    with n bits. """
 
     # Obtains binary number
     result = bin(num).replace("0b", "")

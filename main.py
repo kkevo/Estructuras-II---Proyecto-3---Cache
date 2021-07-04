@@ -19,11 +19,11 @@ offset = math.log(block_size, 2)
 index = math.log(cache_size * KB / (block_size * associativity), 2)
 tag = addr_size - offset - index
 
-print("Cache size:", cache_size, "\n",
-      "Block size:", block_size, "\n",
-      "Associativity:", associativity)
+print("Cache size:", cache_size)
+print("Block size:", block_size)
+print("Associativity:", associativity)
 
-file = open("data", "r")
+file = open("data2", "r")
 
 start = time.time()
 

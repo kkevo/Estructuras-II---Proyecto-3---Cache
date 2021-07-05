@@ -31,12 +31,14 @@ cache = []
 for i in range(associativity):
     way = []
     for j in range(int(2**index)):
-        # Set structure: valid, tag, LRU value
-        way.append([0, 0, 0])
+        # Set structure: valid, tag, LRU value, data 
+        way.append([0, 0, 0, [x for x in range(block_size)]])
     cache.append(way)
         
 hits = 0
 misses = 0
+t1 = 0
+t2 = 0
 
 for line in file:
     addr = toBin(int(line[4], 16), 4).replace("0b", "") + toBin(int(line[5], 16), 4).replace("0b", "") + \
@@ -47,9 +49,11 @@ for line in file:
     addr_tag = addr[0 : int(tag)]
     addr_index = addr[int(tag) : int(tag)+int(index)]
     addr_offset = addr[int(tag)+int(index) : int(tag)+int(index)+int(offset)]
+    
     index_int = int(addr_index, 2)
+    offset_int = int(addr_offset, 2)
 
-    result = lruPolicy(cache, index_int, addr_tag, associativity)
+    result, t1, t2 = lruPolicy(cache, index_int, addr_tag, associativity, offset_int)
     if result:
         hits += 1
     else:  

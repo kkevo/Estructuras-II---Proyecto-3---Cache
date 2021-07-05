@@ -1,4 +1,13 @@
-def lruPolicy(cache, index, tag, associativity):
+def sendToCPU(CPU, data, offset):
+
+    CPU.append(data[offset])
+
+    for byte in data:
+        CPU.append(byte)
+
+    return t1, t2
+
+def lruPolicy(cache, index, tag, associativity, offset):
     ''' Implements LRU policy. Returns 1 for hit
     and 0 for miss. '''
 
@@ -12,8 +21,9 @@ def lruPolicy(cache, index, tag, associativity):
                 for way2 in cache:
                     if (way2[index][2] > 1):
                         way2[index][2] -= 1
+            # t1, t2 = sendToCPU(CPU, way[index][3], offset) **********************
             # hit
-            return 1    
+            return 1, t1, t2
 
         # check if set is invalid
         if (way[index][0] == 0):
@@ -28,6 +38,7 @@ def lruPolicy(cache, index, tag, associativity):
                     if (way2[index][2] > 1):
                         way2[index][2] -= 1
             
+            # sendToCPU() **********************
             # miss
             return 0
 
@@ -47,5 +58,6 @@ def lruPolicy(cache, index, tag, associativity):
         if (way2[index][2] > 1):
             way2[index][2] -= 1     
 
+    # sendToCPU(CPU,cache[lru][index][3] ) **********************
     return 0
     

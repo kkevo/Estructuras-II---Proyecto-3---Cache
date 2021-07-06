@@ -1,9 +1,7 @@
-import time
 import sys
 import math
 # Files
-from functions import toBin
-from prueba import lruPolicy
+from functions import toBin, lruPolicy, time
 
 # Constants
 addr_size = 32
@@ -31,14 +29,15 @@ cache = []
 for i in range(associativity):
     way = []
     for j in range(int(2**index)):
-        # Set structure: valid, tag, LRU value, data 
-        way.append([0, 0, 0, [x for x in range(block_size)]])
+        # Set structure: valid, tag, LRU value
+        way.append([0, 0, 0])
     cache.append(way)
-        
+
 hits = 0
 misses = 0
-t1 = 0
-t2 = 0
+evictions = 0
+time_optimized = 0
+time_not_optimized = 0
 
 for line in file:
     addr = toBin(int(line[4], 16), 4).replace("0b", "") + toBin(int(line[5], 16), 4).replace("0b", "") + \
@@ -53,17 +52,26 @@ for line in file:
     index_int = int(addr_index, 2)
     offset_int = int(addr_offset, 2)
 
-    result, t1, t2 = lruPolicy(cache, index_int, addr_tag, associativity, offset_int)
+    result, t1, t2, eviction = lruPolicy(cache, index_int, addr_tag, associativity, offset_int, block_size)
+    
     if result:
         hits += 1
     else:  
         misses += 1    
+    
+    time_optimized += t1
+    time_not_optimized += t2
+    evictions += eviction
 
 print("\nHits:", hits)
 print("Misses:", misses)
-print("Hits percentage: " +  str(hits/(hits+misses)*100) + "%\n")
+print("Hit rate: {:.3f} %\n".format(hits/(hits+misses)*100) )
+print("Evictions: {:.3f}".format(evictions))
+print('Time optimized: {:.3f} seconds'.format(time_optimized))
+print('Time not optimized:  {:.3f} seconds.'.format(time_not_optimized))
+print("Optimized version is  {:.3f} times faster.".format(time_not_optimized/time_optimized))
 
-end = time.time()
+end = time.time()    
 
-print("Execution time: ", (end-start)/60, "minutes")
+print("Execution time:  {:.3f} minutes".format((end-start)/60))
 

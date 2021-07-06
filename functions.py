@@ -1,3 +1,5 @@
+import time
+
 def toBin(num, n):
     """ Returns binary number
     with n bits. """
@@ -12,46 +14,76 @@ def toBin(num, n):
         return result
 
 
-def lruPolicy(tag, associativity, cache):
-    ##########################
-    # Is the idx necessary?? #
-    ##########################
-    for cache_pos in range(associativity):
-        # Set structure: valid, tag, LRU value, data
-        # check if the entry has data
-        if cache[cache_pos][0]:
-            # if the tags match it's a hit
-            if cache[cache_pos][1] == tag:
-                # update the LRU values to comply with the replacement policy
-                for i in range(associativity):
-                    if cache[i][2] > cache[cache_pos][2]:
-                        cache[i][2] = cache[i][2] - 1
+def sendToCPU(block_size):
+    CPU = []
 
-                # this is the last recently used
-                cache[cache_pos][2] = associativity - 1
+    start = time.time()
+    CPU.append(1)
+    end = time.time()
+    time_optimized = end-start
 
-                # 1 means it was a hit
-                return 1  # return hit??
+    start = time.time()
+    for byte in range(block_size):
+        CPU.append(byte)
+    end = time.time()
+    time_not_optimized = end-start
 
-            # if the block is not valid or the tags does not match, it's a miss
+    return time_optimized, time_not_optimized
 
-            # look for the Least Recently Used (lru)
-            for i in range(associativity):
-                if cache[i][2] < cache[cache_pos][2]:
-                    lru = i
 
-            # replace that block with the new data
-            # set the valid bit in one
-            cache[lru][0] = 1
-            # replace the old tag with the new one
-            cache[lru][1] = tag
+def lruPolicy(cache, index, tag, associativity, offset, block_size):
+    ''' Implements LRU policy. Returns:
+    - 1 for hit and 0 for miss
+    - Time needed to send 1 byte to the CPU
+    - Time needed to send whole block to the CPU'''
+ 
+    for way in cache:
+        # check if there's a hit
+        if (way[index][0] == 1 and tag == way[index][1]):
+            
+            # this is the last recently used
+            if (way[index][2] != associativity):
+                current_LRU = way[index][2] 
+                way[index][2] = associativity + 1                
+                for way2 in cache:
+                    if (way2[index][2] > current_LRU):
+                        way2[index][2] -= 1            
+            # hit
+            return 1, 0, 0, 0
 
-            # update the LRU values to comply with the replacement policy
-            for i in range(associativity):
-                if cache[i][2] > cache[cache_pos][2]:
-                    cache[i][2] = cache[i][2] - 1
+        # check if set is invalid
+        if (way[index][0] == 0):
+            
+            way[index][0] = 1
+            way[index][1] = tag
+            
+            # this is the last recently used
+            if (way[index][2] != associativity):
+                current_LRU = way[index][2] 
+                way[index][2] = associativity + 1
+                for way2 in cache:
+                    if (way2[index][2] > current_LRU):
+                        way2[index][2] -= 1            
+            time_optimized, time_not_optimized = sendToCPU(block_size)
+            # miss
+            return 0, time_optimized, time_not_optimized, 0
 
-            cache[cache_pos][2] = associativity - 1
+    lru_list = []
 
-            # 0 means it was a miss
-            return 0  # return miss??
+    for i in range(associativity):
+        lru_list.append(cache[i][index][2])
+    
+    # se obtiene el la posicion del menos usado
+    lru = min(range(len(lru_list)), key=lru_list.__getitem__)
+    
+    current_LRU = cache[lru][index][2]
+    # update tag
+    cache[lru][index][1] = tag
+    # this is the last recently used
+    cache[lru][index][2] = associativity + 1
+    for way2 in cache:
+        if (way2[index][2] > current_LRU):
+            way2[index][2] -= 1     
+
+    time_optimized, time_not_optimized = sendToCPU(block_size)
+    return 0, time_optimized, time_not_optimized, 1

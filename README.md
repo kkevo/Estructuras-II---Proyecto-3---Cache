@@ -8,3 +8,5 @@ Run tests:
 "make a2" for tests with 64 bytes block size, 32KB cache
 
 "make a3" for tests with 32KB, 8 way cache
+
+"make all" to run all tests
